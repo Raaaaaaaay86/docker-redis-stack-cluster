@@ -1,0 +1,124 @@
+version: v3
+
+services:
+
+  redis-node-1:
+    image: redis/redis-stack-server:latest
+    container_name: redis-node-1
+    ports:
+      - 8001:8001
+      - 18001:18001
+    volumes:
+      - redis-node-1:/data
+      - ./conf/redis.conf:/redis-stack.conf
+    command: ["redis-server", "/redis-stack.conf", --port,"8001", --cluster-announce-ip,"192.168.1.92", --cluster-announce-port,"8001", --cluster-announce-bus-port,"18001"] 
+    networks:
+      redis_stack_cluster_network:
+        ipv4_address: 174.25.0.2
+
+  redis-node-2:
+    image: redis/redis-stack-server:latest
+    container_name: redis-node-2
+    ports:
+      - 8002:8002
+      - 18002:18002
+    volumes:
+      - redis-node-2:/data
+      - ./conf/redis.conf:/redis-stack.conf
+    command: ["redis-server", "/redis-stack.conf", --port,"8002", --cluster-announce-ip,"192.168.1.92", --cluster-announce-port,"8002", --cluster-announce-bus-port,"18002"] 
+    networks:
+      redis_stack_cluster_network:
+        ipv4_address: 174.25.0.3
+
+  redis-node-3:
+    image: redis/redis-stack-server:latest
+    container_name: redis-node-3
+    ports:
+      - 8003:8003
+      - 18003:18003
+    volumes:
+      - redis-node-3:/data
+      - ./conf/redis.conf:/redis-stack.conf
+    command: ["redis-server", "/redis-stack.conf", --port,"8003", --cluster-announce-ip,"192.168.1.92", --cluster-announce-port,"8003", --cluster-announce-bus-port,"18003"] 
+    networks:
+      redis_stack_cluster_network:
+        ipv4_address: 174.25.0.4
+
+  redis-node-4:
+    image: redis/redis-stack-server:latest
+    container_name: redis-node-4
+    ports:
+      - 8004:8004
+      - 18004:18004
+    volumes:
+      - redis-node-4:/data
+      - ./conf/redis.conf:/redis-stack.conf
+    command: ["redis-server", "/redis-stack.conf", --port,"8004", --cluster-announce-ip,"192.168.1.92", --cluster-announce-port,"8004", --cluster-announce-bus-port,"18004"] 
+    networks:
+      redis_stack_cluster_network:
+        ipv4_address: 174.25.0.5
+
+  redis-node-5:
+    image: redis/redis-stack-server:latest
+    container_name: redis-node-5
+    ports:
+      - 8005:8005
+      - 18005:18005
+    volumes:
+      - redis-node-5:/data
+      - ./conf/redis.conf:/redis-stack.conf
+    command: ["redis-server", "/redis-stack.conf", --port,"8005", --cluster-announce-ip,"192.168.1.92", --cluster-announce-port,"8005", --cluster-announce-bus-port,"18005"] 
+    networks:
+      redis_stack_cluster_network:
+        ipv4_address: 174.25.0.6
+
+  redis-node-6:
+    image: redis/redis-stack-server:latest
+    container_name: redis-node-6
+    ports:
+      - 8006:8006
+      - 18006:18006
+    volumes:
+      - redis-node-6:/data
+      - ./conf/redis.conf:/redis-stack.conf
+    command: ["redis-server", "/redis-stack.conf", --port,"8006", --cluster-announce-ip,"192.168.1.92", --cluster-announce-port,"8006", --cluster-announce-bus-port,"18006"] 
+    networks:
+      redis_stack_cluster_network:
+        ipv4_address: 174.25.0.7
+
+  cluster_initiator: 
+    image: "redis/redis-stack-server:latest" 
+    command: "redis-cli --cluster create -a 123456 174.25.0.2:8001 174.25.0.3:8002 174.25.0.4:8003 174.25.0.5:8004 174.25.0.6:8005 174.25.0.7:8006 --cluster-replicas 1 --cluster-yes"
+    depends_on:
+      - redis-node-1 
+      - redis-node-2 
+      - redis-node-3 
+      - redis-node-4 
+      - redis-node-5 
+      - redis-node-6 
+    networks: 
+      redis_stack_cluster_network: 
+        ipv4_address: 174.25.0.8
+
+  redisinsight: 
+    image: redislabs/redisinsight:latest
+    ports: 
+      - 8009:8001
+    networks: 
+      redis_stack_cluster_network: 
+        ipv4_address: 174.25.0.9
+
+networks:
+  redis_stack_cluster_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 174.25.0.0/24
+volumes:
+  redis-node-1:
+  redis-node-2:
+  redis-node-3:
+  redis-node-4:
+  redis-node-5:
+  redis-node-6:
